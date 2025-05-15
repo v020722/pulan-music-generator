@@ -14,10 +14,12 @@ def authenticate_drive():
     """Authenticate Google Drive using client secrets."""
     try:
         # Load client secrets
-        gauth = GoogleAuth()
-        gauth.LoadClientConfigFile('/content/client_secrets.json')
+        if not os.path.exists("client_secrets.json"):
+            st.error("client_secrets.json not found. Please upload the file.")
+            return None
         
-        # Use LocalWebserverAuth instead of CommandLineAuth
+        gauth = GoogleAuth()
+        gauth.LoadClientConfigFile("client_secrets.json")
         gauth.LocalWebserverAuth()  
         
         drive = GoogleDrive(gauth)
@@ -27,8 +29,8 @@ def authenticate_drive():
         st.error(f"❌ Google Drive Authentication Failed: {e}")
         return None
 
-# Initialize the drive
 drive = authenticate_drive()
+
 
 
 # 🎹 Generate Music Function
