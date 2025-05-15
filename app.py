@@ -4,24 +4,17 @@ from pydub import AudioSegment
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 import os
-import json
 
-# 🔐 Load API Key from environment variable
+# 🔐 Set your OpenAI API Key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# 🌐 Google Drive Authentication (No JSON File Required)
 @st.cache_resource
 def authenticate_drive():
-    """Authenticate Google Drive using client secrets."""
+    """Authenticate Google Drive using OAuth 2.0."""
     try:
-        # Load client secrets
-        if not os.path.exists("client_secrets.json"):
-            st.error("client_secrets.json not found. Please upload the file.")
-            return None
-        
         gauth = GoogleAuth()
-        gauth.LoadClientConfigFile("client_secrets.json")
-        gauth.LocalWebserverAuth()  
-        
+        gauth.LocalWebserverAuth()  # Open a browser for Google login
         drive = GoogleDrive(gauth)
         st.success("✅ Google Drive authenticated successfully!")
         return drive
@@ -31,19 +24,20 @@ def authenticate_drive():
 
 drive = authenticate_drive()
 
-
-
 # 🎹 Generate Music Function
 def generate_music(prompt, duration):
     """Generate a MIDI music file based on a prompt."""
     st.write(f"🎼 Generating music for: **{prompt}**")
     try:
+        # ChatCompletion call for music generation
         response = openai.ChatCompletion.create(
             model="gpt-4",
-            messages=[{"role": "system", "content": "You are a music composer."},
-                      {"role": "user", "content": f"Generate a MIDI sequence for the theme: '{prompt}'"}]
+            messages=[
+                {"role": "system", "content": "You are a music composer."},
+                {"role": "user", "content": f"Generate a musical composition for the theme: '{prompt}' in MIDI format."}
+            ]
         )
-        
+
         midi_data = response.choices[0].message['content']
 
         # Save to MIDI file
@@ -58,6 +52,10 @@ def generate_music(prompt, duration):
 # 🔄 Load Music from Google Drive
 def load_from_drive(file_id):
     """Download a MIDI file from Google Drive and play it."""
+    if not drive:
+        st.error("Google Drive is not authenticated.")
+        return
+    
     st.write(f"📥 Downloading from Google Drive ID: **{file_id}**")
     try:
         file = drive.CreateFile({'id': file_id})
