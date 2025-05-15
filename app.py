@@ -9,29 +9,27 @@ import json
 # 🔐 Load API Key from environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# 🌐 Google Drive Authentication
 @st.cache_resource
 def authenticate_drive():
-    """Authenticate Google Drive using client secrets from environment."""
-    client_secret = os.getenv("GOOGLE_DRIVE_CLIENT_SECRET")
-
-    if not client_secret:
-        st.error("❌ Google Drive client secret not found!")
+    """Authenticate Google Drive using client secrets."""
+    try:
+        # Load client secrets
+        gauth = GoogleAuth()
+        gauth.LoadClientConfigFile('/content/client_secrets.json')
+        
+        # Use LocalWebserverAuth instead of CommandLineAuth
+        gauth.LocalWebserverAuth()  
+        
+        drive = GoogleDrive(gauth)
+        st.success("✅ Google Drive authenticated successfully!")
+        return drive
+    except Exception as e:
+        st.error(f"❌ Google Drive Authentication Failed: {e}")
         return None
-    
-    # Save client secret to a JSON file
-    with open('client_secrets.json', 'w') as f:
-        f.write(client_secret)
-    
-    # Authenticate and initialize the drive
-    gauth = GoogleAuth()
-    gauth.LoadClientConfigFile('client_secrets.json')
-    gauth.CommandLineAuth()
-    drive = GoogleDrive(gauth)
-    st.success("✅ Google Drive authenticated successfully!")
-    return drive
 
+# Initialize the drive
 drive = authenticate_drive()
+
 
 # 🎹 Generate Music Function
 def generate_music(prompt, duration):
