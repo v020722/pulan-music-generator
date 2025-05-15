@@ -1,0 +1,6 @@
+streamlit
+openai
+pydub
+ffmpeg
+PyDrive2
+pyngrok
