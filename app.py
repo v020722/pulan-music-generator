@@ -8,7 +8,6 @@ import json
 
 # 🔐 Load API Key from environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
-
 # 🌐 Google Drive Authentication
 @st.cache_resource
 def authenticate_drive():
@@ -34,10 +33,23 @@ def authenticate_drive():
         # Authenticate and initialize the drive
         gauth = GoogleAuth()
         gauth.LoadClientConfigFile('client_secrets.json')
-        gauth.CommandLineAuth()
+
+        # 🔄 Use LocalWebserverAuth instead of CommandLineAuth
+        gauth.LocalWebserverAuth()  
+
         drive = GoogleDrive(gauth)
         st.success("✅ Google Drive authenticated successfully!")
         return drive
+    
+    except KeyError as e:
+        st.error(f"❌ Missing key in Streamlit Secrets: {e}")
+    except Exception as e:
+        st.error(f"❌ Error in Google Drive Authentication: {e}")
+
+    return None
+
+drive = authenticate_drive()
+
     
     except KeyError as e:
         st.error(f"❌ Missing key in Streamlit Secrets: {e}")
