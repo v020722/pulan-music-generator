@@ -12,7 +12,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 def authenticate_drive():
     """Authenticate Google Drive using Streamlit Secrets."""
     try:
-         gauth = GoogleAuth()
+        gauth = GoogleAuth()
         # Manually configure client settings
         gauth.settings['client_config'] = {
             "client_id": st.secrets["client_secrets"]["client_id"],
