@@ -10,18 +10,25 @@ import json
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # 🌐 Google Drive Authentication
-@st.cache_resource
 def authenticate_drive():
-    """Authenticate Google Drive using client secrets from environment."""
-    client_secret = os.getenv("GOOGLE_DRIVE_CLIENT_SECRET")
+    """Authenticate Google Drive using client secrets from Streamlit secrets."""
+    try:
+        client_secret = {
+            "web": {
+                "client_id": st.secrets["GOOGLE_DRIVE_CLIENT_SECRET"]["client_id"],
+                "project_id": st.secrets["GOOGLE_DRIVE_CLIENT_SECRET"]["project_id"],
+                "auth_uri": st.secrets["GOOGLE_DRIVE_CLIENT_SECRET"]["auth_uri"],
+                "token_uri": st.secrets["GOOGLE_DRIVE_CLIENT_SECRET"]["token_uri"],
+                "auth_provider_x509_cert_url": st.secrets["GOOGLE_DRIVE_CLIENT_SECRET"]["auth_provider_x509_cert_url"],
+                "client_secret": st.secrets["GOOGLE_DRIVE_CLIENT_SECRET"]["client_secret"],
+                "redirect_uris": st.secrets["GOOGLE_DRIVE_CLIENT_SECRET"]["redirect_uris"]
+            }
+        }
 
-    if not client_secret:
-        st.error("❌ Google Drive client secret not found!")
-        return None
-    
-    # Save client secret to a JSON file
-    with open('client_secrets.json', 'w') as f:
-        f.write(client_secret)
+        # Save it to JSON format
+        with open('client_secrets.json', 'w') as f:
+            json.dump(client_secret, f)
+
     
     # Authenticate and initialize the drive
     gauth = GoogleAuth()
